@@ -1,0 +1,29 @@
+name: Manual Build Firmware
+on:
+  workflow_dispatch:
+    inputs:
+      pio_env:
+        description: 'PIO环境名称'
+        required: true
+        default: 'esp32-diy-v1'
+      build_flags:
+        description: '自定义编译参数'
+        required: false
+        default: '-DBATTERY_PIN=35 -DADC_MULTIPLIER=1.85 -DADC_ATTENUATION=ADC_ATTEN_DB_11 -DBUTTON_PIN=39'
+      platform:
+        description: '平台类型'
+        required: true
+        default: 'esp32'
+      version:
+        description: '固件版本标记（随便填文字即可）'
+        required: true
+        default: 'custom-build'
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_firmware.yml
+    with:
+      pio_env: ${{ github.event.inputs.pio_env }}
+      build_flags: ${{ github.event.inputs.build_flags }}
+      platform: ${{ github.event.inputs.platform }}
+      version: ${{ github.event.inputs.version }}
