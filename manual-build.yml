@@ -32,9 +32,9 @@ jobs:
         env:
           PLATFORMIO_BUILD_FLAGS: >
             -DBATTERY_PIN=35
-            -DADC_MULTIPLIER=1.85
+            -DADC_MULTIPLIER=2
             -DADC_ATTENUATION=ADC_ATTEN_DB_11
-            -DBUTTON_PIN=39
+            -DBUTTON_PIN=4
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
