@@ -18,13 +18,18 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 安装Python，然后pip安装platformio（不再调用失效的platformio action）
       - name: Setup Python & Install PlatformIO
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
+      - name: Install PlatformIO Core + Meshtastic依赖
+        run: |
+          pip install --upgrade platformio
+          pip install -r requirements.txt
+
+      # ========== 关键：Meshtastic 必须先执行预生成脚本，生成 NodeDB.h / variant.h ==========
+      - name: Run Meshtastic pre-build script
+        run: python meson_setup.py
 
       - name: Build firmware
         run: |
@@ -38,5 +43,4 @@ jobs:
           name: firmware-${{ github.event.inputs.board }}
           path: |
             .pio/build/${{ github.event.inputs.board }}/firmware.bin
-
 
