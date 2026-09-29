@@ -18,8 +18,13 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup PlatformIO
-        uses: platformio/setup-platformio-action@v4
+      # 安装Python，然后pip安装platformio（不再调用失效的platformio action）
+      - name: Setup Python & Install PlatformIO
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
 
       - name: Build firmware
         run: |
@@ -33,4 +38,5 @@ jobs:
           name: firmware-${{ github.event.inputs.board }}
           path: |
             .pio/build/${{ github.event.inputs.board }}/firmware.bin
+
 
