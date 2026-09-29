@@ -1,43 +1,35 @@
 name: Manual Build Firmware
+run-name: Build ESP32 DIY V1
 on:
   workflow_dispatch:
     inputs:
-      pio_env:
-        description: 'PIO环境名称'
+      board:
+        description: 目标板子名称
         required: true
-        default: 'esp32-diy-v1'
-
+        default: esp32-diy-v1
+        type: choice
+        options:
+          - esp32-diy-v1
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
+          fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install PlatformIO
-        run: |
-          python -m pip install --upgrade pip
-          pip install platformio
+      - name: Setup PlatformIO
+        uses: platformio/setup-platformio@v5
 
       - name: Build firmware
         run: |
-          pio run -e ${{ github.event.inputs.pio_env }}
-        env:
-          PLATFORMIO_BUILD_FLAGS: >
-            -DBATTERY_PIN=35
-            -DADC_MULTIPLIER=2
-            -DADC_ATTENUATION=ADC_ATTEN_DB_11
-            -DBUTTON_PIN=4
+          pio run -e ${{ github.event.inputs.board }}
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-${{ github.event.inputs.pio_env }}
-          path: .pio/build/${{ github.event.inputs.pio_env }}/firmware.bin
+          name: firmware-${{ github.event.inputs.board }}
+          path: .pio/build/${{ github.event.inputs.board }}/firmware.bin
+
