@@ -2,14 +2,17 @@ name: Manual Build Meshtastic Firmware
 on:
   workflow_dispatch:
     inputs:
-      board:
-        description: '目标主板，填 esp32-diy-v1'
+      target:
+        description: Platform target name
         required: true
         default: esp32-diy-v1
       build_flags:
-        description: 自定义编译参数
+        description: Extra build flags
         required: false
-        default: '-DBATTERY_PIN=35 -DADC_MULTIPLIER=1.85 -DADC_ATTENUATION=ADC_ATTEN_DB_11'
+        default: >
+          -DBATTERY_PIN=35
+          -DADC_MULTIPLIER=1.85
+          -DADC_ATTENUATION=ADC_ATTEN_DB_11
 
 jobs:
   build:
@@ -18,29 +21,20 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup Python & Install PlatformIO
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install PlatformIO Core + Meshtastic依赖
-        run: |
-          pip install --upgrade platformio
-          pip install -r requirements.txt
 
-      # ========== 关键：Meshtastic 必须先执行预生成脚本，生成 NodeDB.h / variant.h ==========
-      - name: Run Meshtastic pre-build script
-        run: python meson_setup.py
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
 
       - name: Build firmware
         run: |
-          pio run -e ${{ github.event.inputs.board }}
-        env:
-          PLATFORMIO_BUILD_FLAGS: ${{ github.event.inputs.build_flags }}
+          pio run -e ${{ github.event.inputs.target }} -D ${{ github.event.inputs.build_flags }}
 
-      - name: Upload firmware artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-${{ github.event.inputs.board }}
-          path: |
-            .pio/build/${{ github.event.inputs.board }}/firmware.bin
-
+          name: firmware-${{ github.event.inputs.target }}
+          path: .pio/build/${{ github.event.inputs.target }}/*.bin
