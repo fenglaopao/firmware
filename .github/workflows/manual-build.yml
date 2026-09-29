@@ -6,8 +6,8 @@ on:
         description: Platform target name
         required: true
         default: esp32-diy-v1
-      build_flags:
-        description: Extra build flags
+      extra_build_flags:
+        description: Extra build flags (不需要加引号)
         required: false
         default: -DBATTERY_PIN=35 -DADC_MULTIPLIER=1.85 -DADC_ATTENUATION=ADC_ATTEN_DB_11
 
@@ -28,7 +28,7 @@ jobs:
 
       - name: Build firmware
         run: |
-          pio run -e ${{ github.event.inputs.target }} ${{ github.event.inputs.build_flags }}
+          pio run -e ${{ github.event.inputs.target }} --build-flags "${{ github.event.inputs.extra_build_flags }}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
