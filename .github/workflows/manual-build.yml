@@ -1,35 +1,36 @@
-name: Manual Build Firmware
-run-name: Build ESP32 DIY V1
+name: Manual Build Meshtastic Firmware
 on:
   workflow_dispatch:
     inputs:
       board:
-        description: 目标板子名称
+        description: '目标主板，填 esp32-diy-v1'
         required: true
         default: esp32-diy-v1
-        type: choice
-        options:
-          - esp32-diy-v1
+      build_flags:
+        description: 自定义编译参数
+        required: false
+        default: '-DBATTERY_PIN=35 -DADC_MULTIPLIER=1.85 -DADC_ATTENUATION=ADC_ATTEN_DB_11'
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v5
-        with:
-          submodules: recursive
-          fetch-depth: 0
+        uses: actions/checkout@v4
 
       - name: Setup PlatformIO
-        uses: platformio/setup-platformio@v5
+        uses: platformio/setup-platformio-action@v4
 
       - name: Build firmware
         run: |
           pio run -e ${{ github.event.inputs.board }}
+        env:
+          PLATFORMIO_BUILD_FLAGS: ${{ github.event.inputs.build_flags }}
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware-${{ github.event.inputs.board }}
-          path: .pio/build/${{ github.event.inputs.board }}/firmware.bin
+          path: |
+            .pio/build/${{ github.event.inputs.board }}/firmware.bin
 
